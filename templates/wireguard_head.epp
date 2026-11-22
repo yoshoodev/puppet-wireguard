@@ -7,6 +7,7 @@
     Array[String[1]] $postup_cmds,
     Array[String[1]] $predown_cmds,
     Array[String[1]] $postdown_cmds,
+    Array[Stdlib::IP::Address] $default_allowlist = [],
     Optional[Integer[1280, 9000]] $mtu = undef,
 | -%>
 # THIS FILE IS MANAGED BY PUPPET
