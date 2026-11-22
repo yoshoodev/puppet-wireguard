@@ -45,7 +45,7 @@ define wireguard::provider::wgquick (
       ensure => $ensure,
       owner  => 'root',
       mode   => '0600',
-      notify => Service["wg-quick@${interface}"],
+      notify => Exec['reload wg-quick'],
     }
     concat::fragment { "${interface}_head":
       order   => 10,
@@ -58,6 +58,14 @@ define wireguard::provider::wgquick (
       present => 'running',
       absent  => 'stopped',
   }
+
+  exec {'reload wg-quick':
+    command     => "systemctl reload wg-quick@${interface}",
+    refreshonly => true,
+    path        => ['/usr/bin','usr/sbin'],
+    onlyif      => "systemctl is-active wg-quick@${interface}",
+  }
+
   service { "wg-quick@${interface}":
     ensure => $svc_ensure,
     enable => $enable,
