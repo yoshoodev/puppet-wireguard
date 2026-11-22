@@ -40,7 +40,7 @@ class wireguard (
     ensure => $_file_ensure,
     owner  => 'root',
     mode   => '0750',
-    group  => 'systemd-network',
+    group  => 'root',
     *      => $options,
   }
 
