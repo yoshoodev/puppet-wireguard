@@ -393,5 +393,5 @@ define wireguard::interface (
       }
     }
   }
-  Wireguard::Peer <<| tag == "wireguard-${interface}" |>>
+  Wireguard::Peer <<| tag == "wireguard-${interface}" and title != "${facts['networking']['fqdn']}-${interface}-peer" |>>
 }
