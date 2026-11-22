@@ -1,6 +1,7 @@
 <%- |
     String[1] $interface,
     Stdlib::Port $dport,
+    Optional[String[1]] $table,
     Optional[Integer] $firewall_mark,
     Array[Hash] $addresses,
     Array[String[1]] $preup_cmds,
