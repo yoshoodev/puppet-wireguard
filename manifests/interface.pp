@@ -120,6 +120,7 @@ define wireguard::interface (
   Array[Stdlib::IP::Address] $destination_addresses = delete_undef_values([$facts['networking']['ip'], $facts['networking']['ip6'],]),
   String[1] $interface = $title,
   Integer[1024, 65000] $dport = Integer(regsubst($title, '^\D+(\d+)$', '\1')),
+  Array[Variant[Stdlib::IP::Address::V4,Stdlib::IP::Address::V6]] $allowed_ips = [],
   Optional[String[1]] $table = undef,
   Optional[Integer[0, 4294967295]] $firewall_mark = undef,
   String[1] $input_interface = $facts['networking']['primary'],
