@@ -13,7 +13,7 @@ define wireguard::peer (
   Optional[String[1]] $description = undef,
   String $public_key,
   String $endpoint,
-  Variant[Wireguard::Addresses::Wgquick,Wireguard::Addresses::Systemd] $allowed_ips,
+  Array[Variant[Stdlib::IP::Address::V4,Stdlib::IP::Address::V6]] $allowed_ips,
   Optional[String[1]] $preshared_key = undef,
   Integer[0,65535] $persistent_keepalive = 0,
 ) {
