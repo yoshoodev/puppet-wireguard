@@ -139,6 +139,7 @@ define wireguard::interface (
   Array[String[1]] $predown_cmds = [],
   Array[String[1]] $postdown_cmds = [],
   Optional[Stdlib::Port] $endpoint_port = undef,
+  Array[Stdlib::IP::Address] $peer_allowlist = undef,
 ) {
   include wireguard
 
@@ -381,7 +382,7 @@ define wireguard::interface (
         'description'          => $description,
         'public_key'           => $facts['wireguard_pubkeys'][$interface],
         'endpoint'             => "${facts['networking']['fqdn']}:${dport}",
-        'allowed_ips'          => $wireguard::default_allowlist,
+        'allowed_ips'          => $peer_allowlist,
         'preshared_key'        => $preshared_key,
         'persistent_keepalive' => $persistent_keepalive,
         'interface'            => $interface,
