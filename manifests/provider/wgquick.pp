@@ -64,6 +64,14 @@ define wireguard::provider::wgquick (
     refreshonly => true,
     path        => ['/usr/bin','usr/sbin'],
     onlyif      => "systemctl is-active wg-quick@${interface}",
+    notify      => Exec['reload wg-quick private-key']
+  }
+
+  exec {'reload wg-quick private-key':
+    command     => "wg set ${interface} private-key /etc/wireguard/${interface}",
+    refreshonly => true,
+    path        => ['/usr/bin','usr/sbin'],
+    onlyif      => "systemctl is-active wg-quick@${interface}",
   }
 
   service { "wg-quick@${interface}":
