@@ -38,7 +38,7 @@ define wireguard::provider::wgquick (
       content => epp("${module_name}/wireguard_conf.epp", $params + { 'peers' => $peers }),
       owner   => 'root',
       group   => $wireguard::config_directory_group,
-    mode    => '0640',
+      mode    => '0640',
     }
   } else {
     concat { "/etc/wireguard/${interface}.conf":
@@ -55,19 +55,19 @@ define wireguard::provider::wgquick (
   }
 
   $svc_ensure = $ensure ? {
-      present => 'running',
-      absent  => 'stopped',
+    'present' => 'running',
+    'absent'  => 'stopped',
   }
 
-  exec {'reload wg-quick':
+  exec { 'reload wg-quick':
     command     => "systemctl reload wg-quick@${interface}",
     refreshonly => true,
     path        => ['/usr/bin','usr/sbin'],
     onlyif      => "systemctl is-active wg-quick@${interface}",
-    notify      => Exec['reload wg-quick private-key']
+    notify      => Exec['reload wg-quick private-key'],
   }
 
-  exec {'reload wg-quick private-key':
+  exec { 'reload wg-quick private-key':
     command     => "wg set ${interface} private-key /etc/wireguard/${interface}",
     refreshonly => true,
     path        => ['/usr/bin','usr/sbin'],
