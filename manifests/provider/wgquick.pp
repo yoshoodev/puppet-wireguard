@@ -32,8 +32,6 @@ define wireguard::provider::wgquick (
     'predown_cmds'      => $predown_cmds,
     'postdown_cmds'     => $postdown_cmds,
     'default_allowlist' => $default_allowlist,
-    'mesh'              => $mesh,
-    'mesh_psk'          => $mesh_psk,
   }
 
   if ! $mesh {
