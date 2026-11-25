@@ -2,6 +2,8 @@
 # @api private
 #
 define wireguard::provider::wgquick (
+  Boolean $mesh = true,
+  Boolean $mesh_psk = true,
   String[1] $interface = $title,
   Enum['present', 'absent'] $ensure = 'present',
   Boolean $enable = true,
@@ -30,15 +32,18 @@ define wireguard::provider::wgquick (
     'predown_cmds'      => $predown_cmds,
     'postdown_cmds'     => $postdown_cmds,
     'default_allowlist' => $default_allowlist,
+    'mesh'              => $mesh,
+    'mesh_psk'          => $mesh_psk,
   }
 
-  if ! empty($peers) {
+  if ! $mesh {
     file { "${wireguard::config_directory}/${interface}.conf":
       ensure  => $ensure,
       content => epp("${module_name}/wireguard_conf.epp", $params + { 'peers' => $peers }),
       owner   => 'root',
       group   => $wireguard::config_directory_group,
       mode    => '0640',
+      notify  => Exec['reload wg-quick'],
     }
   } else {
     concat { "/etc/wireguard/${interface}.conf":
@@ -51,6 +56,7 @@ define wireguard::provider::wgquick (
       order   => 10,
       target  => "/etc/wireguard/${interface}.conf",
       content => epp("${module_name}/wireguard_head.epp", $params),
+      notify  => Service["wg-quick@${interface}"],
     }
   }
 

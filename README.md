@@ -88,6 +88,47 @@ wireguard::interface {'as1234':
 
 More examples are available in the [REFERENCE.md](./REFERENCE.md) file.
 
+### Generating preshared keys
+
+Use `wireguard::generate_psk` to generate a cryptographically random, base64-encoded
+32-byte PSK for a pair of endpoints. Pass the same two stable identifiers on both
+nodes; their order does not matter. Include the interface name to keep separate
+tunnels between the same nodes independent.
+
+```puppet
+$psk = wireguard::generate_psk('node-a.example.com/wg0', 'node-b.example.com/wg0')
+
+wireguard::interface { 'wg0':
+  dport           => 51820,
+  manage_firewall => false,
+  public_key      => $remote_public_key,
+  preshared_key   => $psk,
+  endpoint        => $remote_endpoint,
+  addresses       => [{'Address' => '192.0.2.1/24'}],
+}
+```
+
+On the other node, use its local address and the opposite endpoint's public key
+and endpoint. The returned string can also be used as `preshared_key` in a `peers`
+entry or a `wireguard::peer` resource, with either provider where applicable.
+Existing explicitly supplied PSKs remain supported.
+
+Keys are generated during catalog compilation, not on agents, and are reused
+from `$vardir/wireguard_psks` on the compiler. An optional third argument selects
+a different absolute storage directory. The dedicated directory must be writable
+by the Puppet Server user; it is restricted to mode `0700`, with key files at
+`0600`. Do not point it at an existing general-purpose directory, since its mode
+will be changed. Compilation fails for an invalid stored key rather than silently
+replacing it.
+
+Back up this directory securely: deleting a key generates a new PSK on the next
+compilation and requires updating both endpoints. All compilers serving these
+nodes must use the same persistent storage with working file locking, or catalogs
+must be compiled by the same server. Separate `puppet apply` runs on different
+nodes do not share storage automatically. Do not publish PSKs as facts or exported
+resources. Like explicitly supplied PSKs, generated keys are present in compiled
+catalogs and rendered configuration files, so protect access to those as well.
+
 ## Parameter reference
 
 All parameters are documented with puppet-strings. You can view the

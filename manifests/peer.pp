@@ -7,6 +7,7 @@
 # @param allowed_ips different addresses that should be routed to this peer
 # @param preshared_key Define preshared key for the remote peer
 # @param persistent_keepalive is set to 1 or greater, that's the interval in seconds wireguard sends a keepalive to the other peer(s). Useful if the sender is behind a NAT gateway or has a dynamic ip address
+# @param mesh_psk whether to generate a preshared key if none is provided
 #
 define wireguard::peer (
   String $interface,
@@ -16,7 +17,19 @@ define wireguard::peer (
   Array[Variant[Stdlib::IP::Address::V4,Stdlib::IP::Address::V6]] $allowed_ips,
   Optional[String[1]] $preshared_key = undef,
   Integer[0,65535] $persistent_keepalive = 0,
+  Boolean $mesh_psk = false,
 ) {
+  $local_id = "${facts['networking']['fqdn']}-${interface}"
+
+  if ! $preshared_key {
+    if $mesh_psk {
+      notice("Generating PSK for ${local_id} / ${title}")
+      $preshared_key = wireguard::generate_psk($local_id, $title)
+    } else {
+      $preshared_key = undef
+    }
+  }
+
   $peer_params = {
     'description'          => $description,
     'public_key'           => $public_key,

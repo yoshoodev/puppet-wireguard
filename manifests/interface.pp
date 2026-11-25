@@ -27,6 +27,8 @@
 # @param predown_cmds is an array of commands which should run as preup command (only supported by wgquick)
 # @param postdown_cmds is an array of commands which should run as preup command (only supported by wgquick)
 # @param endpoint_port optional outgoing port from the other endpoint. Will be used for firewalling. If not set, we will try to parse $endpoint
+# @param mesh if true, creates a mesh of peers using exported resources
+# @param mesh_psk if true, automatically creates and uses PSKs for mesh peers
 #
 # @author Tim Meusel <tim@bastelfreak.de>
 # @author Sebastian Rakel <sebastian@devunit.eu>
@@ -140,6 +142,8 @@ define wireguard::interface (
   Array[String[1]] $postdown_cmds = [],
   Optional[Stdlib::Port] $endpoint_port = undef,
   Array[Stdlib::IP::Address] $peer_allowlist = undef,
+  Boolean $mesh = true,
+  Boolean $mesh_psk = true,
 ) {
   include wireguard
 
@@ -370,28 +374,33 @@ define wireguard::interface (
         postdown_cmds     => $postdown_cmds,
         mtu               => $mtu,
         default_allowlist => $wireguard::default_allowlist,
+        mesh              => $mesh,
+        mesh_psk          => $mesh_psk,
       }
     }
     default: {
       fail("provider ${provider} not supported")
     }
   }
-  if 'wireguard_pubkeys' in $facts {
-    if $interface in $facts['wireguard_pubkeys'] {
-      $peer_params = {
-        'description'          => $description,
-        'public_key'           => $facts['wireguard_pubkeys'][$interface],
-        'endpoint'             => "${facts['networking']['fqdn']}:${dport}",
-        'allowed_ips'          => $peer_allowlist,
-        'preshared_key'        => $preshared_key,
-        'persistent_keepalive' => $persistent_keepalive,
-        'interface'            => $interface,
-        'tag'                  => "wireguard-${interface}",
-      }
-      @@wireguard::peer { "${facts['networking']['fqdn']}-${interface}-peer":
-        * => $peer_params,
+  if $mesh {
+    if 'wireguard_pubkeys' in $facts {
+      if $interface in $facts['wireguard_pubkeys'] {
+        $peer_params = {
+          'description'          => $description,
+          'public_key'           => $facts['wireguard_pubkeys'][$interface],
+          'endpoint'             => "${facts['networking']['fqdn']}:${dport}",
+          'allowed_ips'          => $peer_allowlist,
+          'preshared_key'        => $preshared_key,
+          'persistent_keepalive' => $persistent_keepalive,
+          'interface'            => $interface,
+          'tag'                  => "wireguard-${interface}",
+          'mesh_psk'             => $mesh_psk,
+        }
+        @@wireguard::peer { "${facts['networking']['fqdn']}-${interface}-peer":
+          * => $peer_params,
+        }
       }
     }
+    Wireguard::Peer <<| tag == "wireguard-${interface}" and title != "${facts['networking']['fqdn']}-${interface}-peer" |>>
   }
-  Wireguard::Peer <<| tag == "wireguard-${interface}" and title != "${facts['networking']['fqdn']}-${interface}-peer" |>>
 }
