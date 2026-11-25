@@ -24,10 +24,12 @@ define wireguard::peer (
   if ! $preshared_key {
     if $mesh_psk {
       notice("Generating PSK for ${local_id} / ${title}")
-      $preshared_key = wireguard::generate_psk($local_id, $title)
+      $gen_preshared_key = wireguard::generate_psk($local_id, $title)
     } else {
-      $preshared_key = undef
+      $gen_preshared_key = undef
     }
+  } else {
+    $gen_preshared_key = $preshared_key
   }
 
   $peer_params = {
@@ -35,7 +37,7 @@ define wireguard::peer (
     'public_key'           => $public_key,
     'endpoint'             => $endpoint,
     'allowed_ips'          => $allowed_ips,
-    'preshared_key'        => $preshared_key,
+    'preshared_key'        => $gen_preshared_key,
     'persistent_keepalive' => $persistent_keepalive,
   }
 
