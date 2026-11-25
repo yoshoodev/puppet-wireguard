@@ -19,7 +19,7 @@ define wireguard::peer (
   Integer[0,65535] $persistent_keepalive = 0,
   Boolean $mesh_psk = false,
 ) {
-  $local_id = "${facts['networking']['fqdn']}-${interface}"
+  $local_id = "${facts['networking']['fqdn']}-${interface}-peer"
 
   if ! $preshared_key {
     if $mesh_psk {
