@@ -15,7 +15,7 @@ define wireguard::peer (
   String $public_key,
   String $endpoint,
   Array[Variant[Stdlib::IP::Address::V4,Stdlib::IP::Address::V6]] $allowed_ips,
-  Optional[Sensitive(String[1])] $preshared_key = undef,
+  Optional[Sensitive[String[1]]] $preshared_key = undef,
   Integer[0,65535] $persistent_keepalive = 0,
   Boolean $mesh_psk = false,
 ) {

@@ -134,7 +134,7 @@ define wireguard::interface (
   Array[Hash[String[1], Variant[String[1], Boolean]]] $routes = [],
   Hash[String, Array[Hash[String, Any]]] $extra_networkd_sections = {},
   Optional[String[1]] $private_key = undef,
-  Optional[Sensitive(String[1])] $preshared_key = undef,
+  Optional[Sensitive[String[1]]] $preshared_key = undef,
   Enum['systemd', 'wgquick'] $provider = 'systemd',
   Array[String[1]] $preup_cmds = [],
   Array[String[1]] $postup_cmds = [],
