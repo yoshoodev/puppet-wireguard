@@ -15,13 +15,13 @@ define wireguard::peer (
   String $public_key,
   String $endpoint,
   Array[Variant[Stdlib::IP::Address::V4,Stdlib::IP::Address::V6]] $allowed_ips,
-  Optional[String[1]] $preshared_key = undef,
+  Sensitive[Optional[String[1]]] $preshared_key = undef,
   Integer[0,65535] $persistent_keepalive = 0,
   Boolean $mesh_psk = false,
 ) {
   $local_id = "${facts['networking']['fqdn']}-${interface}-peer"
 
-  if ! $preshared_key {
+  if ! $preshared_key.unwrap {
     if $mesh_psk {
       notice("Generating PSK for ${local_id} / ${title}")
       $gen_preshared_key = wireguard::generate_psk($local_id, $title)
@@ -29,7 +29,7 @@ define wireguard::peer (
       $gen_preshared_key = undef
     }
   } else {
-    $gen_preshared_key = $preshared_key
+    $gen_preshared_key = $preshared_key.unwrap
   }
 
   $peer_params = {
