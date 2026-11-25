@@ -134,7 +134,7 @@ define wireguard::interface (
   Array[Hash[String[1], Variant[String[1], Boolean]]] $routes = [],
   Hash[String, Array[Hash[String, Any]]] $extra_networkd_sections = {},
   Optional[String[1]] $private_key = undef,
-  Optional[String[1]] $preshared_key = undef,
+  Optional[Sensitive(String[1])] $preshared_key = undef,
   Enum['systemd', 'wgquick'] $provider = 'systemd',
   Array[String[1]] $preup_cmds = [],
   Array[String[1]] $postup_cmds = [],
@@ -316,7 +316,7 @@ define wireguard::interface (
     $peer = [{
         public_key           => $public_key,
         endpoint             => $endpoint,
-        preshared_key        => $preshared_key,
+        preshared_key        => Sensitive($preshared_key),
         persistent_keepalive => $persistent_keepalive,
     }]
   } else {
@@ -390,7 +390,7 @@ define wireguard::interface (
           'public_key'           => $facts['wireguard_pubkeys'][$interface],
           'endpoint'             => "${facts['networking']['fqdn']}:${dport}",
           'allowed_ips'          => $peer_allowlist,
-          'preshared_key'        => $preshared_key,
+          'preshared_key'        => Sensitive($preshared_key),
           'persistent_keepalive' => $persistent_keepalive,
           'interface'            => $interface,
           'tag'                  => "wireguard-${interface}",
